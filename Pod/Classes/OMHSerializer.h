@@ -45,5 +45,7 @@
  */
 - (NSString*)jsonForSample:(HKSample*)sample error:(NSError**)error;
 
+- (NSDictionary*)dictionaryForSample:(HKSample*)sample error:(NSError**)error;
+
 @end
 

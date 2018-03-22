@@ -125,6 +125,46 @@
     return jsonString;
 }
 
+- (NSDictionary*)dictionaryForSample:(HKSample*)sample error:(NSError**)error {
+    NSParameterAssert(sample);
+    // first, verify we support the sample type
+    NSArray* supportedTypeIdentifiers = [[self class] supportedTypeIdentifiers];
+    NSString* sampleTypeIdentifier = sample.sampleType.identifier;
+    NSString* serializerClassName;
+    if ([supportedTypeIdentifiers includes:sampleTypeIdentifier]){
+        serializerClassName = [OMHHealthKitConstantsMapper allSupportedTypeIdentifiersToClasses][sampleTypeIdentifier];
+    }
+    else{
+        if (error) {
+            NSString* errorMessage =
+            [NSString stringWithFormat: @"Unsupported HKSample type: %@", sampleTypeIdentifier];
+            NSDictionary* userInfo = @{ NSLocalizedDescriptionKey : errorMessage };
+            *error = [NSError errorWithDomain: OMHErrorDomain
+                                         code: OMHErrorCodeUnsupportedType
+                                     userInfo: userInfo];
+        }
+        return nil;
+    }
+    // if we support it, select appropriate subclass for sample
+    
+    //For sleep analysis, the OMH schema does not capture an 'inBed' state, so if that value is set we need to use a generic category serializer
+    //otherwise, it defaults to using the OMH schema for the 'asleep' state.
+    if ([sampleTypeIdentifier isEqualToString:HKCategoryTypeIdentifierSleepAnalysis]){
+        HKCategorySample* categorySample = (HKCategorySample*)sample;
+        if(categorySample.value == HKCategoryValueSleepAnalysisInBed){
+            serializerClassName = @"OMHSerializerGenericCategorySample";
+        }
+    }
+    Class serializerClass = NSClassFromString(serializerClassName);
+    // subclass verifies it supports sample's values
+    if (![serializerClass canSerialize:sample error:error]) {
+        return nil;
+    }
+    // instantiate a serializer
+    OMHSerializer* serializer = [[serializerClass alloc] initWithSample:sample];
+    return [serializer data];
+}
+
 + (NSString*)parseUnitFromQuantity:(HKQuantity*)quantity {
     NSArray *arrayWithSplitUnitAndValue = [quantity.description
                                            componentsSeparatedByCharactersInSet:[NSCharacterSet
