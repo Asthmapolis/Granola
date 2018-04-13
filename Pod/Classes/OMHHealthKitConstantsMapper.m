@@ -359,7 +359,9 @@
                                         HKQuantityTypeIdentifierPeripheralPerfusionIndex: @"OMHSerializerGenericQuantitySample",
                                         HKQuantityTypeIdentifierRespiratoryRate: @"OMHSerializerRespiratoryRate",
                                         HKQuantityTypeIdentifierStepCount : @"OMHSerializerStepCount",
-                                        HKQuantityTypeIdentifierUVExposure: @"OMHSerializerGenericQuantitySample"
+                                        HKQuantityTypeIdentifierUVExposure: @"OMHSerializerGenericQuantitySample",
+                                        HKQuantityTypeIdentifierDistanceWheelchair: @"OMHSerializerGenericQuantitySample",
+                                        HKQuantityTypeIdentifierPushCount: @"OMHSerializerGenericQuantitySample"
                                         };
     }
     return allQuantityTypeIdsToClasses;
